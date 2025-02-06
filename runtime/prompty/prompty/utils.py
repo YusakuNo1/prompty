@@ -2,7 +2,7 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict
+from typing import Any, Dict, Union
 from pathlib import Path
 
 import aiofiles
@@ -35,7 +35,7 @@ async def load_json_async(file_path, encoding="utf-8"):
     return json.loads(content)
 
 
-def _find_global_config(prompty_path: Path = Path.cwd()) -> typing.Union[Path, None]:
+def _find_global_config(prompty_path: Path = Path.cwd()) -> Union[Path, None]:
     prompty_config = list(Path.cwd().glob("**/prompty.json"))
 
     if len(prompty_config) > 0:
@@ -53,7 +53,7 @@ def _find_global_config(prompty_path: Path = Path.cwd()) -> typing.Union[Path, N
 
 def load_global_config(
     prompty_path: Path = Path.cwd(), configuration: str = "default"
-) -> dict[str, typing.Any]:
+) -> dict[str, Any]:
     # prompty.config laying around?
     config = _find_global_config(prompty_path)
 
@@ -70,7 +70,7 @@ def load_global_config(
 
 async def load_global_config_async(
     prompty_path: Path = Path.cwd(), configuration: str = "default"
-) -> dict[str, typing.Any]:
+) -> dict[str, Any]:
     # prompty.config laying around?
     config = _find_global_config(prompty_path)
 

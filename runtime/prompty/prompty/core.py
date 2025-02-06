@@ -1,8 +1,8 @@
 import os
 from collections.abc import AsyncIterator, Iterator
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, fields, asdict
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Set, Union
+from typing import Any, Dict, List, Literal, Union
 from .tracer import Tracer, to_dict
 from .utils import load_json, load_json_async, sanitize
 
@@ -138,7 +138,9 @@ class Prompty:
 
     def to_safe_dict(self) -> dict[str, any]:
         d = {}
-        for k, v in self:
+        for field in fields(self):
+            k = field.name
+            v = getattr(self, field.name)
             if v != "" and v != {} and v != [] and v is not None:
                 if k == "model":
                     d[k] = asdict(self.model)
@@ -166,8 +168,8 @@ class Prompty:
     def hoist_base_prompty(top: "Prompty", base: "Prompty") -> "Prompty":
         top.name = base.name if top.name == "" else top.name
         top.description = base.description if top.description == "" else top.description
-        top.authors = List(Set(base.authors + top.authors))
-        top.tags = List(Set(base.tags + top.tags))
+        top.authors = list(set(base.authors + top.authors))
+        top.tags = list(set(base.tags + top.tags))
         top.version = base.version if top.version == "" else top.version
 
         top.model.api = base.model.api if top.model.api == "" else top.model.api

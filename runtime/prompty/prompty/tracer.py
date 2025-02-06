@@ -14,18 +14,6 @@ from typing import Any, Callable, Union
 from pydantic import BaseModel
 
 
-# clean up key value pairs for sensitive values
-def sanitize(key: str, value: Any) -> Any:
-    if isinstance(value, str) and any(
-        [s in key.lower() for s in ["key", "secret", "password", "credential"]]
-    ):
-        return 10 * "*"
-    elif isinstance(value, dict):
-        return {k: sanitize(k, v) for k, v in value.items()}
-    else:
-        return value
-
-
 class Tracer:
     _tracers: dict[
         str,

@@ -25,7 +25,7 @@ export class ModelConfiguration {
 export class ModelSettings {
   api: string = "chat";
   configuration: ModelConfiguration = { type: "unknown" } as ModelConfiguration;
-  parameters: any = {};
+  parameters: Record<string, any> = {};
   response: any = {};
 }
 
@@ -126,7 +126,7 @@ export class Prompty {
     }
   }
 
-  static async load(filePath: string, configuration: string = "default"): Promise<any> {
+  static async load(filePath: string, configuration: string = "default"): Promise<Prompty> {
     filePath = path.resolve(filePath);
     const p = new Prompty(await utils.readFileSafe(filePath));
     const c = await Prompty._findGlobalConfig(filePath);

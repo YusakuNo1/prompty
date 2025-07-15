@@ -86,10 +86,120 @@ namespace Prompty.Core.Tests
 
             Assert.IsType<ChatMessage[]>(prepared);
             var messages = (ChatMessage[])prepared;
+            Console.WriteLine("******************************************");
+            Console.WriteLine(messages[0].Role);
+            Console.WriteLine(messages[1].Role);
 
             Assert.Equal(2, messages.Length);
             Assert.Equal(replacementText.question, messages[1].Text);
         }
+
+        class MyInputs
+        {
+            public string firstName { get; set; } = string.Empty;
+            public string lastName { get; set; } = string.Empty;
+            public string input { get; set; } = string.Empty;
+            public List<ChatMessage> chat_history { get; set; } = new List<ChatMessage>();
+        }
+        [Theory]
+        [InlineData("prompty/chat.prompty")]
+        public void PrepareWithDavidTest(string path)
+        {
+            var imageUrl = "https://www.citypng.com/public/uploads/preview/hd-starbucks-circle-woman-logo-png-701751694778942nj9szlwtvw.png";
+            var chat_history = new List<ChatMessage>
+            {
+                // new ChatMessage
+                // {
+                //     Role = ChatRole.User,
+                //     Contents = new List<AIContent>
+                //     {
+                //         new UriContent(imageUrl, "image/png")
+                //         // {
+                //         //     AdditionalProperties = new AdditionalPropertiesDictionary
+                //         //     {
+                //         //         { "caption", "This is a logo of Starbucks." }
+                //         //     }
+                //         // }
+                //         // imageUrlContent
+                //     }
+                // },
+                new ChatMessage
+                {
+                    Role = ChatRole.Assistant,
+                    Contents = new List<AIContent>
+                    {
+                        new TextContent("This is a logo of Starbucks.")
+                    }
+                }
+            };
+            // var chat_history = new List<object>
+            // {
+            //     new 
+            //     {
+            //         role = "user",
+            //         content = new List<object>
+            //         {
+            //             new { type = "image_url", image_url = new { url = imageUrl } }
+            //         }
+            //     },
+            //     new 
+            //     {
+            //         role = "assistant",
+            //         content = new List<object>
+            //         {
+            //             new { type = "text", text = "This is a logo of Starbucks." },
+            //         }
+            //     }
+            // };
+            var inputs = new MyInputs
+            {
+                firstName = "Jack",
+                lastName = "Brown",
+                input = "OTHER_TEXT_OTHER_TEXT",
+                chat_history = chat_history,
+            };
+
+            // var inputs = new
+            // {
+            //     firstName = "Jack",
+            //     lastName = "Brown",
+            //     input = "OTHER_TEXT_OTHER_TEXT",
+            //     chat_history = new List<object>
+            //     {
+            //         new
+            //         {
+            //             role = "user",
+            //             content = new List<object>
+            //             {
+            //                 new
+            //                 {
+            //                     type = "image_url",
+            //                     image_url = new { url = imageUrl }
+            //                 }
+            //             }
+            //         },
+            //         // new
+            //         // {
+            //         //     role = "assistant",
+            //         //     content = new List<object>
+            //         //     {
+            //         //         new { type = "text", text = "This is a logo of Starbucks." }
+            //         //     }
+            //         // }
+            //     }
+            // };
+            var prompty = Prompty.Load(path);
+            var prepared = prompty.Prepare(inputs, true);
+
+
+
+            Assert.IsType<ChatMessage[]>(prepared);
+            var messages = (ChatMessage[])prepared;
+
+            // Assert.Equal(3, messages.Length);
+            // Assert.Equal(inputs.question, messages[1].Text);
+        }
+
 
     }
 }

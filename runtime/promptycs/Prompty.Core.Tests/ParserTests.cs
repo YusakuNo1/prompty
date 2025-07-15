@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.AI;
 using Prompty.Core.Parsers;
+using Newtonsoft.Json;
 
 namespace Prompty.Core.Tests
 {
@@ -36,7 +37,7 @@ namespace Prompty.Core.Tests
         }
 
         [Fact]
-        public void TestParseWithArgs() 
+        public void TestParseWithArgs()
         {
             var content = "system[key=\"value 1\", post=false, great=True, other=3.2, pre = 2]:\nYou are an AI assistant\n who helps people find information.\nAs the assistant, you answer questions briefly, succinctly.\n\nuser:\nWhat is the meaning of life?";
             var parser = new PromptyChatParser(new Prompty());
@@ -50,6 +51,32 @@ namespace Prompty.Core.Tests
             Assert.True((float)3.2 - (float)messages[0].Items["other"] < .001);
             Assert.Equal(2, messages[0].Items["pre"]);
             Assert.Equal("user", messages[1].Items["role"]);
+        }
+
+        // [InlineData("generated/1contoso.md")]
+        // [InlineData("generated/2contoso.md")]
+        // [InlineData("generated/3contoso.md")]
+        // [InlineData("generated/4contoso.md")]
+        // [InlineData("generated/basic.prompty.md")]
+        // [InlineData("generated/context.prompty.md")]
+        // [InlineData("generated/contoso_multi.md")]
+        // [InlineData("generated/faithfulness.prompty.md")]
+        // [InlineData("generated/groundedness.prompty.md")]
+        [Fact]
+        public void TestParserForDavid()
+        {
+            var jsonInputs = File.ReadAllText("prompty/chat.json");
+            // convert json to dictionary<string, string>
+            // var inputs = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(jsonInputs);
+            // load text from file path
+            // var text = File.ReadAllText(path);
+            var prompty = Prompty.Load("prompty/chat.prompty");
+            var invoker = InvokerFactory.Instance.CreateParser("prompty.chat", prompty);
+            var result = invoker.Invoke(jsonInputs);
+
+            Assert.NotNull(result);
+            Assert.IsAssignableFrom<ChatMessage[]>(result);
+            Assert.True(((ChatMessage[])result).Length > 0);
         }
     }
 }

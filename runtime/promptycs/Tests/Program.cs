@@ -16,6 +16,9 @@ public class Program
         //        { "question", "what is the meaning of life" }
         //    };
 
+        // Print to console log messages
+        Console.WriteLine("Running Prompty with inputs...");
+
         // load chat.json file as new dictionary<string, string>
         var jsonInputs = File.ReadAllText("chat.json");
         // convert json to dictionary<string, string>

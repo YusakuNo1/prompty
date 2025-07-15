@@ -96,6 +96,7 @@ public partial class Prompty
     public object Prepare(object? inputs = null, bool mergeSample = false)
     {
         var resolvedInputs = ValidateInputs(inputs, mergeSample);
+        // var resolvedInputs = inputs;
         object render = RunInvoker(InvokerType.Renderer, resolvedInputs, Content ?? "");
         object parsed = RunInvoker(InvokerType.Parser, render);
         return parsed;

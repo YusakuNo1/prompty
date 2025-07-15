@@ -40,14 +40,6 @@
     "image_url": {
       "url": "https://www.citypng.com/public/uploads/preview/hd-starbucks-circle-woman-logo-png-701751694778942nj9szlwtvw.png"
     }
-  }, {
-    "role": "assistant",
-    "content": [
-        {
-            "type": "text",
-            "text": "This is a logo of Starbucks."
-        }
-    ]
   }]
 }]
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Scriban;
 
 namespace Prompty.Core.Tests
 {
@@ -101,6 +102,7 @@ namespace Prompty.Core.Tests
             public string input { get; set; } = string.Empty;
             public List<ChatMessage> chat_history { get; set; } = new List<ChatMessage>();
         }
+
         [Theory]
         [InlineData("prompty/chat.prompty")]
         public void PrepareWithDavidTest(string path)
@@ -201,5 +203,98 @@ namespace Prompty.Core.Tests
         }
 
 
+        [Theory]
+        [InlineData("prompty/chat.prompty")]
+        public void DavidTest1(string path)
+        {
+            var imageUrl = "https://www.citypng.com/public/uploads/preview/hd-starbucks-circle-woman-logo-png-701751694778942nj9szlwtvw.png";
+            var inputs = new
+            {
+                firstName = "Jack",
+                lastName = "Brown",
+                input = "OTHER_TEXT_OTHER_TEXT",
+                chat_history = new List<object>
+                {
+                    new
+                    {
+                        role = "user",
+                        content = new List<object>
+                        {
+                            new
+                            {
+                                type = "image_url",
+                                image_url = new { url = imageUrl }
+                            }
+                        }
+                    },
+                    // new
+                    // {
+                    //     role = "assistant",
+                    //     content = new List<object>
+                    //     {
+                    //         new { type = "text", text = "This is a logo of Starbucks." }
+                    //     }
+                    // }
+                }
+            };
+            var prompty = Prompty.Load(path);
+            var prepared = prompty.Prepare(inputs, true);
+
+            Assert.IsType<ChatMessage[]>(prepared);
+            var messages = (ChatMessage[])prepared;
+        }
+
+        [Fact]
+        public void DavidTest2()
+        {
+            var imageUrl = "https://www.citypng.com/public/uploads/preview/hd-starbucks-circle-woman-logo-png-701751694778942nj9szlwtvw.png";
+            var inputs = new
+            {
+                name = "Jack",
+                chat_history = new List<object>
+                {
+                    // new
+                    // {
+                    //     role = "user",
+                    //     content = new List<object>
+                    //     {
+                    //         new
+                    //         {
+                    //             type = "image_url",
+                    //             image_url = new { url = imageUrl }
+                    //         }
+                    //     }
+                    // },
+                    // new
+                    // {
+                    //     role = "assistant",
+                    //     content = new List<object>
+                    //     {
+                    //         new { type = "text", text = "This is a logo of Starbucks." }
+                    //     }
+                    // }
+                    new { name = "Alex", content = new object[] { "Hello Alex!", "Good morning Alex!" } },
+                    new { name = "Bob", content = new object[] { "Hello Bob!", "Good evening Bob!" } },
+                    new { name = "Charlie", content = new object[] { "Hello Charlie!", "Good night Charlie!" } },
+                }
+            };
+//             var prompt = @"
+// Hello {{name}}!
+
+// {% for item in chat_history %}
+// {{item.role}}:
+// {{item.content}}
+// {% endfor %}";
+            var prompt = @"
+Hello {{name}}!
+
+{% for item in chat_history %}
+{{item.name}}: {{item.content[0]}}
+{{item.name}}: {{item.content[1]}}
+{% endfor %}";
+            var template = Scriban.Template.ParseLiquid(prompt);
+            var result1 = template.Render(inputs);
+            Console.WriteLine(result1);
+        }
     }
 }

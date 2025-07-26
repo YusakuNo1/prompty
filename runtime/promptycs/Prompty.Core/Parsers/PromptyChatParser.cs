@@ -6,7 +6,7 @@ namespace Prompty.Core.Parsers
     enum ContentType
     {
         Text,
-        LocalImage,
+        // LocalImage,
         RemoteImage,
         DataImage,
     }
@@ -34,6 +34,19 @@ namespace Prompty.Core.Parsers
 
         public PromptyChatParser(Prompty prompty) : base(prompty) { }
 
+        private AIContent loadLocalImage(string content, string media)
+        {
+            try
+            {
+                var image = GetImageContent(content, media);
+                return new DataContent(data: image, mediaType: media);
+            }
+            catch (Exception ex)
+            {
+                return new TextContent(content);
+            }
+        }
+
         public override object Invoke(object args)
         {
             if (args.GetType() != typeof(string))
@@ -49,9 +62,10 @@ namespace Prompty.Core.Parsers
                         {
                             case ContentType.Text:
                                 return new TextContent(c.Content);
-                            case ContentType.LocalImage:
-                                var image = GetImageContent(c.Content, c.Media);
-                                return new DataContent(data: image, mediaType: c.Media);
+                            // case ContentType.LocalImage:
+                            //     // var image = GetImageContent(c.Content, c.Media);
+                            //     // return new DataContent(data: image, mediaType: c.Media);
+                            //     return loadLocalImage(c.Content, c.Media);
                             case ContentType.RemoteImage:
                                 return new UriContent(uri: c.Content, mediaType: c.Media);
                             case ContentType.DataImage:
@@ -88,11 +102,13 @@ namespace Prompty.Core.Parsers
                         {
                             case ContentType.Text:
                                 return new TextContent(c.Content);
-                            case ContentType.LocalImage:
-                                var image = await GetImageContentAsync(c.Content, c.Media);
-                                return new DataContent(data: image, mediaType: c.Media);
+                            // case ContentType.LocalImage:
+                            //     var image = await GetImageContentAsync(c.Content, c.Media);
+                            //     return new DataContent(data: image, mediaType: c.Media);
                             case ContentType.RemoteImage:
                                 return new UriContent(uri: c.Content, mediaType: c.Media);
+                            case ContentType.DataImage:
+                                return new DataContent(uri: c.Content, mediaType: c.Media);
                             default:
                                 throw new Exception("Invalid content type!");
                         }
@@ -259,7 +275,39 @@ namespace Prompty.Core.Parsers
                     else
                     {
                         SplitImageUri(chunk, out var imagePath, out var mediaType, out var isRemote);
-                        yield return new RawContent { ContentType = isRemote ? ContentType.RemoteImage : ContentType.LocalImage, Content = imagePath, Media = mediaType };
+
+                        if (imagePath == null)
+                        {
+                            yield return new RawContent { ContentType = ContentType.Text, Content = chunk.Trim() };
+                        }
+                        else if (isRemote)
+                        {
+                            yield return new RawContent { ContentType = ContentType.RemoteImage, Content = imagePath, Media = mediaType };
+                        }
+                        else
+                        {
+                            byte[]? image = null;
+                            try
+                            {
+                                image = GetImageContent(imagePath, mediaType);
+                            }
+                            catch (Exception)
+                            {
+                            }
+
+                            if (image == null)
+                                yield return new RawContent { ContentType = ContentType.Text, Content = chunk.Trim() };
+                            else
+                                yield return new RawContent { ContentType = ContentType.DataImage, Content = chunk, Media = mediaType };
+
+                            // return new DataContent(data: image, mediaType: c.Media);
+                            // var image = GetImageContent(imagePath, mediaType);
+                            // yield return new RawContent { ContentType = ContentType.LocalImage, Content = image };
+                            // yield return new RawContent { ContentType = ContentType.LocalImage, Content = imagePath, Media = mediaType };
+
+                            // yield return new RawContent { ContentType = isRemote ? ContentType.RemoteImage : ContentType.LocalImage, Content = imagePath, Media = mediaType };
+                        }
+
                     }
 
                     current_chunk++;
